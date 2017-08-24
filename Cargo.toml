@@ -1,0 +1,6 @@
+[package]
+name = "dehex"
+version = "0.1.0"
+authors = ["Ulf Ejlertsson <ulf.ejlertsson@gmail.com>"]
+
+[dependencies]
