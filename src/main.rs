@@ -20,8 +20,6 @@ use errors::*;
 const MAX_WORKER: usize = 4;
 
 
-
-
 fn main() {
     if let Err(ref e) = run() {
         use std::io::Write;
