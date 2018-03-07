@@ -29,8 +29,9 @@ use std::io::prelude::*;
 use std::string::String;
 
 
-const MAX_WORKER: usize = 4;
 
+
+const MAX_WORKER: usize = 4;
 
 
 fn open(path: &str) -> Result<File> {
@@ -52,6 +53,7 @@ fn create(path: &str) -> Result<File> {
 fn write(path: &str, text: &str) -> Result<()> {
     let mut file = create(path)?;
     file.write_all(text.as_bytes());
+
     Ok(())
 }
 
