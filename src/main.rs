@@ -1,98 +1,63 @@
 //
 // main.rs
 //
+extern crate sdl2;
+extern crate gl;
 
-
-// `error_chain!` can recurse deeply
-#![recursion_limit = "1024"]
-
-#[macro_use]
-extern crate error_chain;
-
-mod errors {
-    // Create the Error, ErrorKind, ResultExt, and Result types
-    error_chain!{
-        types {
-            Error, ErrorKind, ResultExt, Result;
-        }
-
-        foreign_links {
-            Fmt(::std::fmt::Error);
-            Io(::std::io::Error) #[cfg(unix)];
-        }
-    }
-}
-
-use errors::*;
-use std::fs::File;
-use std::io::prelude::*;
-use std::string::String;
-
-
-
-
-const MAX_WORKER: usize = 4;
-
-
-fn open(path: &str) -> Result<File> {
-    File::open(path).chain_err(|| format!("Can't open '{}'", path))
-}
-
-fn read(path: &str) -> Result<String> {
-    let mut result = String::new();
-    let mut file = open(path)?;
-    file.read_to_string(&mut result)?;
-
-    Ok(result)
-}
-
-fn create(path: &str) -> Result<File> {
-    File::create(path).chain_err(|| format!("Can't write to '{}'", path))
-}
-
-fn write(path: &str, text: &str) -> Result<()> {
-    let mut file = create(path)?;
-    file.write_all(text.as_bytes());
-
-    Ok(())
-}
-
+pub mod render_gl;
 
 fn main() {
-    if let Err(ref e) = run() {
-        use std::io::Write;
-        let stderr = &mut ::std::io::stderr();
-        let errmsg = "Error writing to stderr";
 
-        writeln!(stderr, "error: {}", e).expect(errmsg);
+    let sdl = sdl2::init().unwrap();
+    let video_subsystem = sdl.video().unwrap();
 
-        for e in e.iter().skip(1) {
-            writeln!(stderr, "caused by: {}", e).expect(errmsg);
-        }
+    let gl_attr = video_subsystem.gl_attr();
+    gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
+    gl_attr.set_context_version(4, 2);
 
-        // The backtrace is not always generated. Try to run this example
-        // with `RUST_BACKTRACE=1`.
-        if let Some(backtrace) = e.backtrace() {
-            writeln!(stderr, "backtrace: {:?}", backtrace).expect(errmsg);
-        }
+    let window = video_subsystem.window("DeHex", 900, 700)
+        .resizable()
+        .build()
+        .unwrap();
 
-        ::std::process::exit(1);
+    let ogl_context = window.gl_create_context().unwrap();
+    let ogl = gl::load_with(|s| {
+        video_subsystem.gl_get_proc_address(s) as *const std::os::raw::c_void
+    });
+
+    unsafe {
+        gl::Viewport(0, 0, 900, 700);
+        gl::ClearColor(0.3, 0.3, 0.5, 1.0);
     }
-}
 
+    use std::ffi::CString;
 
-fn run() -> Result<()> {
-    use std::fs::File;
-    /*
-    open("dummyfile");
+    let vert_shader = render_gl::Shader::from_vert_source(
+        &CString::new(include_str!("triangle.vert")).unwrap()
+    ).unwrap();
 
-    let s: Result<String> = read("tretrete222");
-    let path = "dummy";
+    let frag_shader = render_gl::Shader::from_frag_source(
+        &CString::new(include_str!("triangle.frag")).unwrap()
+    ).unwrap();
 
-    let f: Result<File> = File::open(path).chain_err(|| format!("Can't open '{}'", path));
-*/
-    // This operation will fail
-    File::open("tretrete").chain_err(|| "unable to open tretrete file")?;
+    let shader_program =
+        render_gl::Program::from_shaders(&[vert_shader, frag_shader]).unwrap();
 
-    Ok(())
+    shader_program.set_used();
+
+    let mut event_pump = sdl.event_pump().unwrap();
+    'main: loop {
+        for event in event_pump.poll_iter() {
+            match event {
+                sdl2::event::Event::Quit { .. } => break 'main,
+                _ => {}
+            }
+        }
+
+        unsafe {
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
+
+        window.gl_swap_window();
+    }
 }
