@@ -8,8 +8,4 @@ authors = ["Ulf Ejlertsson <ulf.ejlertsson@gmail.com>"]
 travis-ci = { repository = "stormogulen/dehex" }
 
 [dependencies]
-gl = "0.10.0"
-
-[dependencies.sdl2]
-version = "0.31.0"
-features = ["bundled", "static-link"]
+pretty-hex = "0.1.0"
