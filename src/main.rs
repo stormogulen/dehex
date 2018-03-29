@@ -12,12 +12,18 @@ extern crate rand;
 
 use glutin_window::GlutinWindow;
 use opengl_graphics::{GlGraphics, OpenGL};
-use piston::event_loop::*;
-use piston::input::*;
-use piston::window::WindowSettings;
 
-use std::collections::LinkedList;
-use std::iter::FromIterator;
+
+use piston::{
+    event_loop::*,
+    input::*,
+    window::WindowSettings
+};
+
+use std::{
+    collections::LinkedList,
+    iter::FromIterator
+};
 
 
 pub struct Game {
