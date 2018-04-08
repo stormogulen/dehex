@@ -36,6 +36,6 @@ script:
       if [[ "$TRAVIS_RUST_VERSION" == "nightly" && $CLIPPY ]]; then
         cargo clippy
       fi
-  - cargo fmt -- --write-mode=diff      
+
   - cargo build --verbose --all
   - cargo test --verbose --all
