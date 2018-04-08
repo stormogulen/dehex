@@ -36,6 +36,5 @@ script:
       if [[ "$TRAVIS_RUST_VERSION" == "nightly" && $CLIPPY ]]; then
         cargo clippy
       fi
-
   - cargo build --verbose --all
   - cargo test --verbose --all
